@@ -21,6 +21,17 @@ namespace Trivia
         int currentPlayerIndex = 0;
         bool isGettingOutOfPenaltyBox;
 
+        private string CurrentPlayerName
+        {
+            get { return playerNames[currentPlayerIndex]; }
+        }
+
+        private int CurrentBoardPosition
+        {
+            get { return boardPositionsByPlayerIndex[currentPlayerIndex]; }
+            set { boardPositionsByPlayerIndex[currentPlayerIndex] = value; }
+        }
+
         private const int TotalBoardPositions = 12;
 
         public TriviaGame()
@@ -28,149 +39,168 @@ namespace Trivia
             for (int questionNumber = 0; questionNumber < 50; questionNumber++)
             {
                 popQuestions.AddLast("Pop Question " + questionNumber);
-                scienceQuestions.AddLast(("Science Question " + questionNumber));
-                sportsQuestions.AddLast(("Sports Question " + questionNumber));
-                rockQuestions.AddLast(createRockQuestion(questionNumber));
+                scienceQuestions.AddLast("Science Question " + questionNumber);
+                sportsQuestions.AddLast("Sports Question " + questionNumber);
+                rockQuestions.AddLast("Rock Question " + questionNumber);
             }
-        }
-
-        public String createRockQuestion(int index)
-        {
-            return "Rock Question " + index;
-        }
-
-        public bool CanStartGame()
-        {
-            return (GetPlayerCount() >= 2);
         }
 
         public bool AddPlayer(String playerName)
         {
             playerNames.Add(playerName);
-            boardPositionsByPlayerIndex[GetPlayerCount()] = 0;
-            coinsByPlayerIndex[GetPlayerCount()] = 0;
-            isInPenaltyBoxByPlayerIndex[GetPlayerCount()] = false;
+            var newPlayerIndex = playerNames.Count;
 
-            Console.WriteLine(playerName + " was added");
-            Console.WriteLine("They are player number " + playerNames.Count);
+            InitializePlayer(newPlayerIndex);
+
+            GameNotifications.NotifyAboutNewPlayer(playerName, newPlayerIndex);
             return true;
         }
 
-        public int GetPlayerCount()
+        private void InitializePlayer(int newPlayerIndex)
         {
-            return playerNames.Count;
+            boardPositionsByPlayerIndex[newPlayerIndex] = 0;
+            coinsByPlayerIndex[newPlayerIndex] = 0;
+            isInPenaltyBoxByPlayerIndex[newPlayerIndex] = false;
         }
 
         public void TakeTurn(int standardDieRoll)
         {
-            Console.WriteLine(playerNames[currentPlayerIndex] + " is the current player");
-            Console.WriteLine("They have rolled a " + standardDieRoll);
+            var currentPlayerName = CurrentPlayerName;
+
+            GameNotifications.NotifyAboutCurrentPlayer(currentPlayerName);
+            GameNotifications.NotifyAboutDieRoll(standardDieRoll);
 
             var isInPenaltyBox = isInPenaltyBoxByPlayerIndex[currentPlayerIndex];
             if (isInPenaltyBox)
             {
-                isGettingOutOfPenaltyBox = standardDieRoll%2 != 0;
-                
-                if (!isGettingOutOfPenaltyBox)
+                if (!TryGetOutOfPenaltyBox(standardDieRoll))
                 {
-                    Console.WriteLine(playerNames[currentPlayerIndex] + " is not getting out of the penalty box");
+                    GameNotifications.NotifyStuckInTheBox(currentPlayerName);
                     return;
                 }
 
-                Console.WriteLine(playerNames[currentPlayerIndex] + " is getting out of the penalty box");
+                GameNotifications.NotifyGotOutOfBox(currentPlayerName);
             }
 
-            AdvancePositionAndAskQuestion(standardDieRoll);
+            AdvancePosition(standardDieRoll);
+
+            WriteLocationAndCategory();
+
+            AskQuestion();
         }
 
-        private void AdvancePositionAndAskQuestion(int standardDieRoll)
+        private bool TryGetOutOfPenaltyBox(int standardDieRoll)
         {
-            var nextPosition = (boardPositionsByPlayerIndex[currentPlayerIndex] + standardDieRoll) % TotalBoardPositions;
-            boardPositionsByPlayerIndex[currentPlayerIndex] = nextPosition;
-
-            Console.WriteLine(playerNames[currentPlayerIndex]
-                              + "'s new location is "
-                              + boardPositionsByPlayerIndex[currentPlayerIndex]);
-            Console.WriteLine("The category is " + GetQuestionCategoryFromCurrentPlayerBoardPosition());
-            askQuestion();
+            isGettingOutOfPenaltyBox = standardDieRoll % 2 != 0;
+            return isGettingOutOfPenaltyBox;
         }
 
-        private void askQuestion()
+        private void WriteLocationAndCategory()
         {
-            if (GetQuestionCategoryFromCurrentPlayerBoardPosition() == "Pop")
-            {
-                Console.WriteLine(popQuestions.First());
-                popQuestions.RemoveFirst();
-            }
-            if (GetQuestionCategoryFromCurrentPlayerBoardPosition() == "Science")
-            {
-                Console.WriteLine(scienceQuestions.First());
-                scienceQuestions.RemoveFirst();
-            }
-            if (GetQuestionCategoryFromCurrentPlayerBoardPosition() == "Sports")
-            {
-                Console.WriteLine(sportsQuestions.First());
-                sportsQuestions.RemoveFirst();
-            }
-            if (GetQuestionCategoryFromCurrentPlayerBoardPosition() == "Rock")
-            {
-                Console.WriteLine(rockQuestions.First());
-                rockQuestions.RemoveFirst();
-            }
+            var boardPosition = CurrentBoardPosition;
+
+            var currentPlayerName = CurrentPlayerName;
+            GameNotifications.NotifyNewLocation(currentPlayerName, boardPosition);
+
+            var category = Board.GetCategoryForPosition(boardPosition);
+            GameNotifications.NotifyCategory(category);
         }
 
-
-        private String GetQuestionCategoryFromCurrentPlayerBoardPosition()
+        private void AdvancePosition(int standardDieRoll)
         {
-            if (boardPositionsByPlayerIndex[currentPlayerIndex] == 0) return "Pop";
-            if (boardPositionsByPlayerIndex[currentPlayerIndex] == 4) return "Pop";
-            if (boardPositionsByPlayerIndex[currentPlayerIndex] == 8) return "Pop";
-            if (boardPositionsByPlayerIndex[currentPlayerIndex] == 1) return "Science";
-            if (boardPositionsByPlayerIndex[currentPlayerIndex] == 5) return "Science";
-            if (boardPositionsByPlayerIndex[currentPlayerIndex] == 9) return "Science";
-            if (boardPositionsByPlayerIndex[currentPlayerIndex] == 2) return "Sports";
-            if (boardPositionsByPlayerIndex[currentPlayerIndex] == 6) return "Sports";
-            if (boardPositionsByPlayerIndex[currentPlayerIndex] == 10) return "Sports";
-            return "Rock";
+            var nextPosition = (CurrentBoardPosition + standardDieRoll) % TotalBoardPositions;
+            CurrentBoardPosition = nextPosition;
         }
+
+        private void AskQuestion()
+        {
+            var boardPosition = CurrentBoardPosition;
+
+            var questionCategory = Board.GetCategoryForPosition(boardPosition);
+
+            var questions = GetQuestionsForCategory(questionCategory);
+
+            WriteQuestionAndDiscard(questions);
+        }
+
+        private LinkedList<string> GetQuestionsForCategory(string questionCategory)
+        {
+            switch (questionCategory)
+            {
+                case "Pop":
+                    return popQuestions;
+                case "Science":
+                    return scienceQuestions;
+                case "Sports":
+                    return sportsQuestions;
+                case "Rock":
+                    return rockQuestions;
+                default:
+                    throw new ArgumentException();
+            }
+        }
+
+        private static void WriteQuestionAndDiscard(LinkedList<string> questions)
+        {
+            var question = questions.First();
+            GameNotifications.NotifyQuestion(question);
+            questions.RemoveFirst();
+        }
+
 
         public bool HandleCorrectAnswer()
         {
             var isStayingInPenaltyBox = isInPenaltyBoxByPlayerIndex[currentPlayerIndex] && !isGettingOutOfPenaltyBox;
             if (isStayingInPenaltyBox)
             {
-                currentPlayerIndex++;
-                if (currentPlayerIndex == playerNames.Count) currentPlayerIndex = 0;
+                AdvancePlayer();
                 return true;
             }
 
-            Console.WriteLine("Answer was correct!!!!");
+            GameNotifications.NotifyCorrectAnswer();
             coinsByPlayerIndex[currentPlayerIndex]++;
 
-            Console.WriteLine(playerNames[currentPlayerIndex]
-                              + " now has "
-                              + coinsByPlayerIndex[currentPlayerIndex]
-                              + " Gold Coins.");
+            var currentPlayerName = CurrentPlayerName;
+            var currentPlayerCoins = coinsByPlayerIndex[currentPlayerIndex];
+            GameNotifications.NotifyPlayerCoins(currentPlayerName, currentPlayerCoins);
 
             bool winner = HasCurrentPlayerWon();
 
-            currentPlayerIndex++;
-            if (currentPlayerIndex == playerNames.Count) currentPlayerIndex = 0;
+            AdvancePlayer();
 
             return winner;
         }
 
-        public bool SendPlayerToPenaltyBoxAndEndTurn()
+        private void AdvancePlayer()
         {
-            Console.WriteLine("Question was incorrectly answered");
-            Console.WriteLine(playerNames[currentPlayerIndex] + " was sent to the penalty box");
-            isInPenaltyBoxByPlayerIndex[currentPlayerIndex] = true;
-
-            currentPlayerIndex++;
-            if (currentPlayerIndex == playerNames.Count) currentPlayerIndex = 0;
-            return true;
+            currentPlayerIndex = AdvancePlayer(currentPlayerIndex);
         }
 
+        private int AdvancePlayer(int currentPlayerIndex)
+        {
+            currentPlayerIndex++;
+            
+            if (currentPlayerIndex == playerNames.Count)
+            {
+                currentPlayerIndex = 0;
+            }
+
+            return currentPlayerIndex;
+        }
+
+
+        public bool SendPlayerToPenaltyBoxAndEndTurn()
+        {
+            GameNotifications.NotifyIncorrectAnswer();
+            var currentPlayerName = CurrentPlayerName;
+
+            GameNotifications.NotifyPenaltyAdded(currentPlayerName);
+            isInPenaltyBoxByPlayerIndex[currentPlayerIndex] = true;
+
+            AdvancePlayer();
+
+            return true;
+        }
 
         private bool HasCurrentPlayerWon()
         {

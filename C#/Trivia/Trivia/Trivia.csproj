@@ -66,7 +66,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Board.cs" />
     <Compile Include="GameDemo.cs" />
+    <Compile Include="GameNotifications.cs" />
     <Compile Include="IRandom.cs" />
     <Compile Include="NSidedDie.cs" />
     <Compile Include="QuestionAnswerer.cs" />
