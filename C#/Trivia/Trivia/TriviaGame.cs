@@ -21,6 +21,12 @@ namespace Trivia
         int currentPlayerIndex = 0;
         bool isGettingOutOfPenaltyBox;
 
+        private int CurrentPlayerCoins
+        {
+            get { return coinsByPlayerIndex[currentPlayerIndex]; }
+            set { coinsByPlayerIndex[currentPlayerIndex] = value; }
+        }
+
         private string CurrentPlayerName
         {
             get { return playerNames[currentPlayerIndex]; }
@@ -158,10 +164,10 @@ namespace Trivia
             }
 
             GameNotifications.NotifyCorrectAnswer();
-            coinsByPlayerIndex[currentPlayerIndex]++;
+            CurrentPlayerCoins++;
 
             var currentPlayerName = CurrentPlayerName;
-            var currentPlayerCoins = coinsByPlayerIndex[currentPlayerIndex];
+            var currentPlayerCoins = CurrentPlayerCoins;
             GameNotifications.NotifyPlayerCoins(currentPlayerName, currentPlayerCoins);
 
             bool winner = HasCurrentPlayerWon();
@@ -204,7 +210,7 @@ namespace Trivia
 
         private bool HasCurrentPlayerWon()
         {
-            return !(coinsByPlayerIndex[currentPlayerIndex] == 6);
+            return !(CurrentPlayerCoins == 6);
         }
     }
 
