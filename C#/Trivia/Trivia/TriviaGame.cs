@@ -6,7 +6,12 @@ namespace Trivia
 {
     public class TriviaGame
     {
-        List<string> playerNames = new List<string>();
+        class Player
+        {
+            public string Name { get; set; }
+        }
+
+        List<Player> playerNames = new List<Player>();
 
         int[] boardPositionsByPlayerIndex = new int[6];
         int[] coinsByPlayerIndex = new int[6];
@@ -34,7 +39,7 @@ namespace Trivia
 
         private string CurrentPlayerName
         {
-            get { return playerNames[currentPlayerIndex]; }
+            get { return playerNames[currentPlayerIndex].Name; }
         }
 
         private int NumberOfPlayers
@@ -63,7 +68,7 @@ namespace Trivia
 
         public bool AddPlayer(String playerName)
         {
-            playerNames.Add(playerName);
+            playerNames.Add(new Player{Name = playerName});
             var newPlayerIndex = NumberOfPlayers;
 
             InitializePlayer(newPlayerIndex);
@@ -195,7 +200,7 @@ namespace Trivia
         private int AdvancePlayer(int currentPlayerIndex)
         {
             currentPlayerIndex++;
-            
+
             if (currentPlayerIndex == NumberOfPlayers)
             {
                 currentPlayerIndex = 0;
