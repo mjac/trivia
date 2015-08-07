@@ -11,26 +11,26 @@ namespace Trivia
 
         public static void Main(String[] args)
         {
-            Game game = new Game();
+            TriviaGame triviaGame = new TriviaGame();
 
-            game.AddPlayer("Chet");
-            game.AddPlayer("Pat");
-            game.AddPlayer("Sue");
+            triviaGame.AddPlayer("Chet");
+            triviaGame.AddPlayer("Pat");
+            triviaGame.AddPlayer("Sue");
             
             Random randomDieRoll = (args.Length == 0 ? new Random() : new Random(args[0].GetHashCode()));
 
             do
             {
 
-                game.TakeTurn(randomDieRoll.Next(5) + 1);
+                triviaGame.TakeTurn(randomDieRoll.Next(5) + 1);
 
                 if (randomDieRoll.Next(9) == 7)
                 {
-                    hasNotWon = game.SendPlayerToPenaltyBoxAndEndTurn();
+                    hasNotWon = triviaGame.SendPlayerToPenaltyBoxAndEndTurn();
                 }
                 else
                 {
-                    hasNotWon = game.HandleCorrectAnswer();
+                    hasNotWon = triviaGame.HandleCorrectAnswer();
                 }
 
 
