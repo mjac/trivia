@@ -9,6 +9,12 @@ namespace Trivia
         private class Players
         {
             public List<Player> players = new List<Player>();
+            public int Count { get { return players.Count; }}
+
+            public void Add(Player player)
+            {
+                players.Add(player);
+            }
         }
 
         class Player
@@ -36,7 +42,7 @@ namespace Trivia
 
         private int NumberOfPlayers
         {
-            get { return players.players.Count; }
+            get { return players.Count; }
         }
 
         private const int TotalBoardPositions = 12;
@@ -54,7 +60,7 @@ namespace Trivia
 
         public bool AddPlayer(String playerName)
         {
-            players.players.Add(new Player{Name = playerName});
+            players.Add(new Player{Name = playerName});
             var newPlayerIndex = NumberOfPlayers;
 
             GameNotifications.NotifyAboutNewPlayer(playerName, newPlayerIndex);
