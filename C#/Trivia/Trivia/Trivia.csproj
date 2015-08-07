@@ -71,6 +71,7 @@
     <Compile Include="GameNotifications.cs" />
     <Compile Include="IRandom.cs" />
     <Compile Include="NSidedDie.cs" />
+    <Compile Include="Players.cs" />
     <Compile Include="QuestionAnswerer.cs" />
     <Compile Include="TriviaGame.cs" />
     <Compile Include="GameRunner.cs" />

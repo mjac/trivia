@@ -6,50 +6,7 @@ namespace Trivia
 {
     public class TriviaGame
     {
-        private class Players
-        {
-            int currentPlayerIndex = 0;
-            public List<Player> players = new List<Player>();
-            public int Count { get { return players.Count; }}
-
-            public Player CurrentPlayer
-            {
-                get
-                {
-                    return players[currentPlayerIndex];
-                }
-            }
-
-            public void Add(Player player)
-            {
-                players.Add(player);
-            }
-
-            public void AdvancePlayer()
-            {
-                currentPlayerIndex = AdvancePlayer(currentPlayerIndex);
-            }
-
-            private int AdvancePlayer(int currentPlayerIndex)
-            {
-                currentPlayerIndex++;
-
-                if (currentPlayerIndex == players.Count)
-                {
-                    currentPlayerIndex = 0;
-                }
-
-                return currentPlayerIndex;
-            }
-        }
-
-        class Player
-        {
-            public string Name { get; set; }
-            public int Coins { get; set; }
-            public int Position { get; set; }
-            public bool Penalty { get; set; }
-        }
+        
 
         private Players players = new Players();
 
@@ -63,11 +20,6 @@ namespace Trivia
         private Player CurrentPlayer
         {
             get { return players.CurrentPlayer; }
-        }
-
-        private int NumberOfPlayers
-        {
-            get { return players.Count; }
         }
 
         private const int TotalBoardPositions = 12;
@@ -86,7 +38,7 @@ namespace Trivia
         public bool AddPlayer(String playerName)
         {
             players.Add(new Player{Name = playerName});
-            var newPlayerIndex = NumberOfPlayers;
+            var newPlayerIndex = players.Count;
 
             GameNotifications.NotifyAboutNewPlayer(playerName, newPlayerIndex);
             return true;
@@ -219,5 +171,4 @@ namespace Trivia
             return !(CurrentPlayer.Coins == 6);
         }
     }
-
 }
