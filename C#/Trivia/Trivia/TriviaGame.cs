@@ -32,6 +32,11 @@ namespace Trivia
             get { return playerNames[currentPlayerIndex]; }
         }
 
+        private int NumberOfPlayers
+        {
+            get { return playerNames.Count; }
+        }
+
         private int CurrentBoardPosition
         {
             get { return boardPositionsByPlayerIndex[currentPlayerIndex]; }
@@ -54,7 +59,7 @@ namespace Trivia
         public bool AddPlayer(String playerName)
         {
             playerNames.Add(playerName);
-            var newPlayerIndex = playerNames.Count;
+            var newPlayerIndex = NumberOfPlayers;
 
             InitializePlayer(newPlayerIndex);
 
@@ -186,7 +191,7 @@ namespace Trivia
         {
             currentPlayerIndex++;
             
-            if (currentPlayerIndex == playerNames.Count)
+            if (currentPlayerIndex == NumberOfPlayers)
             {
                 currentPlayerIndex = 0;
             }
