@@ -11,7 +11,7 @@ namespace Trivia.Tests
         [Test]
         public void FirstGoldenMasterTest()
         {
-            Assert.DoesNotThrow(() => GameRunner.Main(new[] { Seed }));
+            Assert.DoesNotThrow(() => GameDemo.Main(new[] { Seed }));
         }
 
         [Test]
@@ -20,7 +20,7 @@ namespace Trivia.Tests
             var gameOutput = new StringWriter();
             Console.SetOut(gameOutput);
 
-            GameRunner.Main(new[] { Seed });
+            GameDemo.Main(new[] { Seed });
 
             var originalGoldenMaster = File.ReadAllText("goldenmasteremptyseed.txt");
 
@@ -33,7 +33,7 @@ namespace Trivia.Tests
             var gameOutput = new StringWriter();
             Console.SetOut(gameOutput);
 
-            GameRunner.Main(new[] { "Hello" });
+            GameDemo.Main(new[] { "Hello" });
 
             var originalGoldenMaster = File.ReadAllText("goldenmasteremptyseed.txt");
 
@@ -45,7 +45,7 @@ namespace Trivia.Tests
         public void CaptureOutput()
         {
             OutToFile(@"D:\goldenmasteremptyseed.txt");
-            GameRunner.Main(new[] { Seed });
+            GameDemo.Main(new[] { Seed });
         }
 
         public void OutToFile(string outFileName)

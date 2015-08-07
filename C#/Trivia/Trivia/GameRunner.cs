@@ -1,46 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 
 namespace Trivia
 {
     public class GameRunner
     {
-        private static bool hasNotWon;
-
-        public static void Main(String[] args)
+        public void PlayGame(TriviaGame triviaGame, NSidedDie turnDie, QuestionAnswerer questionAnswerer)
         {
-            TriviaGame triviaGame = new TriviaGame();
-
-            triviaGame.AddPlayer("Chet");
-            triviaGame.AddPlayer("Pat");
-            triviaGame.AddPlayer("Sue");
-            
-            Random randomDieRoll = (args.Length == 0 ? new Random() : new Random(args[0].GetHashCode()));
+            bool hasNotWon;
 
             do
             {
+                triviaGame.TakeTurn(turnDie.RollDie());
 
-                triviaGame.TakeTurn(randomDieRoll.Next(5) + 1);
-
-                if (randomDieRoll.Next(9) == 7)
-                {
-                    hasNotWon = triviaGame.SendPlayerToPenaltyBoxAndEndTurn();
-                }
-                else
+                var isCorrectAnswer = questionAnswerer.GetIsCorrectAnswer();
+                if (isCorrectAnswer)
                 {
                     hasNotWon = triviaGame.HandleCorrectAnswer();
                 }
-
-
-
+                else
+                {
+                    hasNotWon = triviaGame.SendPlayerToPenaltyBoxAndEndTurn();
+                }
             } while (hasNotWon);
-
         }
-
-
     }
-
 }
 
