@@ -9,14 +9,12 @@ namespace Trivia
         class Player
         {
             public string Name { get; set; }
+            public int Coins { get; set; }
+            public int Position { get; set; }
+            public bool Penalty { get; set; }
         }
 
-        List<Player> playerNames = new List<Player>();
-
-        int[] boardPositionsByPlayerIndex = new int[6];
-        int[] coinsByPlayerIndex = new int[6];
-
-        bool[] isInPenaltyBoxByPlayerIndex = new bool[6];
+        List<Player> players = new List<Player>();
 
         LinkedList<string> popQuestions = new LinkedList<string>();
         LinkedList<string> scienceQuestions = new LinkedList<string>();
@@ -27,30 +25,30 @@ namespace Trivia
         bool isGettingOutOfPenaltyBox;
         private bool CurrentPlayerInPenaltyBox
         {
-            get { return isInPenaltyBoxByPlayerIndex[currentPlayerIndex]; }
-            set { isInPenaltyBoxByPlayerIndex[currentPlayerIndex] = value; }
+            get { return players[currentPlayerIndex].Penalty; }
+            set { players[currentPlayerIndex].Penalty = value; }
         }
 
         private int CurrentPlayerCoins
         {
-            get { return coinsByPlayerIndex[currentPlayerIndex]; }
-            set { coinsByPlayerIndex[currentPlayerIndex] = value; }
+            get { return players[currentPlayerIndex].Coins; }
+            set { players[currentPlayerIndex].Coins = value; }
         }
 
         private string CurrentPlayerName
         {
-            get { return playerNames[currentPlayerIndex].Name; }
+            get { return players[currentPlayerIndex].Name; }
         }
 
         private int NumberOfPlayers
         {
-            get { return playerNames.Count; }
+            get { return players.Count; }
         }
 
         private int CurrentBoardPosition
         {
-            get { return boardPositionsByPlayerIndex[currentPlayerIndex]; }
-            set { boardPositionsByPlayerIndex[currentPlayerIndex] = value; }
+            get { return players[currentPlayerIndex].Position; }
+            set { players[currentPlayerIndex].Position = value; }
         }
 
         private const int TotalBoardPositions = 12;
@@ -68,20 +66,11 @@ namespace Trivia
 
         public bool AddPlayer(String playerName)
         {
-            playerNames.Add(new Player{Name = playerName});
+            players.Add(new Player{Name = playerName});
             var newPlayerIndex = NumberOfPlayers;
-
-            InitializePlayer(newPlayerIndex);
 
             GameNotifications.NotifyAboutNewPlayer(playerName, newPlayerIndex);
             return true;
-        }
-
-        private void InitializePlayer(int newPlayerIndex)
-        {
-            boardPositionsByPlayerIndex[newPlayerIndex] = 0;
-            coinsByPlayerIndex[newPlayerIndex] = 0;
-            isInPenaltyBoxByPlayerIndex[newPlayerIndex] = false;
         }
 
         public void TakeTurn(int standardDieRoll)
