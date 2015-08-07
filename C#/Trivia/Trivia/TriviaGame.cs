@@ -28,37 +28,15 @@ namespace Trivia
 
         int currentPlayerIndex = 0;
         bool isGettingOutOfPenaltyBox;
+
         private Player CurrentPlayer
         {
             get { return players.players[currentPlayerIndex]; }
         }
 
-        private bool CurrentPlayerInPenaltyBox
-        {
-            get { return CurrentPlayer.Penalty; }
-            set { CurrentPlayer.Penalty = value; }
-        }
-
-        private int CurrentPlayerCoins
-        {
-            get { return CurrentPlayer.Coins; }
-            set { CurrentPlayer.Coins = value; }
-        }
-
-        private string CurrentPlayerName
-        {
-            get { return CurrentPlayer.Name; }
-        }
-
         private int NumberOfPlayers
         {
             get { return players.players.Count; }
-        }
-
-        private int CurrentBoardPosition
-        {
-            get { return CurrentPlayer.Position; }
-            set { CurrentPlayer.Position = value; }
         }
 
         private const int TotalBoardPositions = 12;
@@ -85,12 +63,12 @@ namespace Trivia
 
         public void TakeTurn(int standardDieRoll)
         {
-            var currentPlayerName = CurrentPlayerName;
+            var currentPlayerName = CurrentPlayer.Name;
 
             GameNotifications.NotifyAboutCurrentPlayer(currentPlayerName);
             GameNotifications.NotifyAboutDieRoll(standardDieRoll);
 
-            var isInPenaltyBox = CurrentPlayerInPenaltyBox;
+            var isInPenaltyBox = CurrentPlayer.Penalty;
             if (isInPenaltyBox)
             {
                 if (!TryGetOutOfPenaltyBox(standardDieRoll))
@@ -117,9 +95,9 @@ namespace Trivia
 
         private void WriteLocationAndCategory()
         {
-            var boardPosition = CurrentBoardPosition;
+            var boardPosition = CurrentPlayer.Position;
 
-            var currentPlayerName = CurrentPlayerName;
+            var currentPlayerName = CurrentPlayer.Name;
             GameNotifications.NotifyNewLocation(currentPlayerName, boardPosition);
 
             var category = Board.GetCategoryForPosition(boardPosition);
@@ -128,13 +106,13 @@ namespace Trivia
 
         private void AdvancePosition(int standardDieRoll)
         {
-            var nextPosition = (CurrentBoardPosition + standardDieRoll) % TotalBoardPositions;
-            CurrentBoardPosition = nextPosition;
+            var nextPosition = (CurrentPlayer.Position + standardDieRoll) % TotalBoardPositions;
+            CurrentPlayer.Position = nextPosition;
         }
 
         private void AskQuestion()
         {
-            var boardPosition = CurrentBoardPosition;
+            var boardPosition = CurrentPlayer.Position;
 
             var questionCategory = Board.GetCategoryForPosition(boardPosition);
 
@@ -170,7 +148,7 @@ namespace Trivia
 
         public bool HandleCorrectAnswer()
         {
-            var isStayingInPenaltyBox = CurrentPlayerInPenaltyBox && !isGettingOutOfPenaltyBox;
+            var isStayingInPenaltyBox = CurrentPlayer.Penalty && !isGettingOutOfPenaltyBox;
             if (isStayingInPenaltyBox)
             {
                 AdvancePlayer();
@@ -178,10 +156,10 @@ namespace Trivia
             }
 
             GameNotifications.NotifyCorrectAnswer();
-            CurrentPlayerCoins++;
+            CurrentPlayer.Coins++;
 
-            var currentPlayerName = CurrentPlayerName;
-            var currentPlayerCoins = CurrentPlayerCoins;
+            var currentPlayerName = CurrentPlayer.Name;
+            var currentPlayerCoins = CurrentPlayer.Coins;
             GameNotifications.NotifyPlayerCoins(currentPlayerName, currentPlayerCoins);
 
             bool winner = HasCurrentPlayerWon();
@@ -212,10 +190,10 @@ namespace Trivia
         public bool SendPlayerToPenaltyBoxAndEndTurn()
         {
             GameNotifications.NotifyIncorrectAnswer();
-            var currentPlayerName = CurrentPlayerName;
+            var currentPlayerName = CurrentPlayer.Name;
 
             GameNotifications.NotifyPenaltyAdded(currentPlayerName);
-            CurrentPlayerInPenaltyBox = true;
+            CurrentPlayer.Penalty = true;
 
             AdvancePlayer();
 
@@ -224,7 +202,7 @@ namespace Trivia
 
         private bool HasCurrentPlayerWon()
         {
-            return !(CurrentPlayerCoins == 6);
+            return !(CurrentPlayer.Coins == 6);
         }
     }
 
