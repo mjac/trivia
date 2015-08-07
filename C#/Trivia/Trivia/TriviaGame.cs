@@ -21,7 +21,7 @@ namespace Trivia
         int currentPlayerIndex = 0;
         bool isGettingOutOfPenaltyBox;
 
-        private const int TotalBoardPositions = 11;
+        private const int TotalBoardPositions = 12;
 
         public TriviaGame()
         {
@@ -66,42 +66,33 @@ namespace Trivia
             Console.WriteLine(playerNames[currentPlayerIndex] + " is the current player");
             Console.WriteLine("They have rolled a " + standardDieRoll);
 
-            if (isInPenaltyBoxByPlayerIndex[currentPlayerIndex])
+            var isInPenaltyBox = isInPenaltyBoxByPlayerIndex[currentPlayerIndex];
+            if (isInPenaltyBox)
             {
-                if (standardDieRoll % 2 != 0)
-                {
-                    isGettingOutOfPenaltyBox = true;
-
-                    Console.WriteLine(playerNames[currentPlayerIndex] + " is getting out of the penalty box");
-                    boardPositionsByPlayerIndex[currentPlayerIndex] = boardPositionsByPlayerIndex[currentPlayerIndex] + standardDieRoll;
-                    if (boardPositionsByPlayerIndex[currentPlayerIndex] > TotalBoardPositions) boardPositionsByPlayerIndex[currentPlayerIndex] = boardPositionsByPlayerIndex[currentPlayerIndex] - 12;
-
-                    Console.WriteLine(playerNames[currentPlayerIndex]
-                            + "'s new location is "
-                            + boardPositionsByPlayerIndex[currentPlayerIndex]);
-                    Console.WriteLine("The category is " + GetQuestionCategoryFromCurrentPlayerBoardPosition());
-                    askQuestion();
-                }
-                else
+                isGettingOutOfPenaltyBox = standardDieRoll%2 != 0;
+                
+                if (!isGettingOutOfPenaltyBox)
                 {
                     Console.WriteLine(playerNames[currentPlayerIndex] + " is not getting out of the penalty box");
-                    isGettingOutOfPenaltyBox = false;
+                    return;
                 }
 
-            }
-            else
-            {
-
-                boardPositionsByPlayerIndex[currentPlayerIndex] = boardPositionsByPlayerIndex[currentPlayerIndex] + standardDieRoll;
-                if (boardPositionsByPlayerIndex[currentPlayerIndex] > TotalBoardPositions) boardPositionsByPlayerIndex[currentPlayerIndex] = boardPositionsByPlayerIndex[currentPlayerIndex] - 12;
-
-                Console.WriteLine(playerNames[currentPlayerIndex]
-                        + "'s new location is "
-                        + boardPositionsByPlayerIndex[currentPlayerIndex]);
-                Console.WriteLine("The category is " + GetQuestionCategoryFromCurrentPlayerBoardPosition());
-                askQuestion();
+                Console.WriteLine(playerNames[currentPlayerIndex] + " is getting out of the penalty box");
             }
 
+            AdvancePositionAndAskQuestion(standardDieRoll);
+        }
+
+        private void AdvancePositionAndAskQuestion(int standardDieRoll)
+        {
+            var nextPosition = (boardPositionsByPlayerIndex[currentPlayerIndex] + standardDieRoll) % TotalBoardPositions;
+            boardPositionsByPlayerIndex[currentPlayerIndex] = nextPosition;
+
+            Console.WriteLine(playerNames[currentPlayerIndex]
+                              + "'s new location is "
+                              + boardPositionsByPlayerIndex[currentPlayerIndex]);
+            Console.WriteLine("The category is " + GetQuestionCategoryFromCurrentPlayerBoardPosition());
+            askQuestion();
         }
 
         private void askQuestion()
@@ -145,49 +136,28 @@ namespace Trivia
 
         public bool HandleCorrectAnswer()
         {
-            if (isInPenaltyBoxByPlayerIndex[currentPlayerIndex])
+            var isStayingInPenaltyBox = isInPenaltyBoxByPlayerIndex[currentPlayerIndex] && !isGettingOutOfPenaltyBox;
+            if (isStayingInPenaltyBox)
             {
-                if (isGettingOutOfPenaltyBox)
-                {
-                    Console.WriteLine("Answer was correct!!!!");
-                    coinsByPlayerIndex[currentPlayerIndex]++;
-                    Console.WriteLine(playerNames[currentPlayerIndex]
-                            + " now has "
-                            + coinsByPlayerIndex[currentPlayerIndex]
-                            + " Gold Coins.");
-
-                    bool hasWon = HasCurrentPlayerWon();
-                    currentPlayerIndex++;
-                    if (currentPlayerIndex == playerNames.Count) currentPlayerIndex = 0;
-
-                    return hasWon;
-                }
-                else
-                {
-                    currentPlayerIndex++;
-                    if (currentPlayerIndex == playerNames.Count) currentPlayerIndex = 0;
-                    return true;
-                }
-
-
-
-            }
-            else
-            {
-
-                Console.WriteLine("Answer was corrent!!!!");
-                coinsByPlayerIndex[currentPlayerIndex]++;
-                Console.WriteLine(playerNames[currentPlayerIndex]
-                        + " now has "
-                        + coinsByPlayerIndex[currentPlayerIndex]
-                        + " Gold Coins.");
-
-                bool winner = HasCurrentPlayerWon();
                 currentPlayerIndex++;
                 if (currentPlayerIndex == playerNames.Count) currentPlayerIndex = 0;
-
-                return winner;
+                return true;
             }
+
+            Console.WriteLine("Answer was correct!!!!");
+            coinsByPlayerIndex[currentPlayerIndex]++;
+
+            Console.WriteLine(playerNames[currentPlayerIndex]
+                              + " now has "
+                              + coinsByPlayerIndex[currentPlayerIndex]
+                              + " Gold Coins.");
+
+            bool winner = HasCurrentPlayerWon();
+
+            currentPlayerIndex++;
+            if (currentPlayerIndex == playerNames.Count) currentPlayerIndex = 0;
+
+            return winner;
         }
 
         public bool SendPlayerToPenaltyBoxAndEndTurn()
