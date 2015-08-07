@@ -8,12 +8,38 @@ namespace Trivia
     {
         private class Players
         {
+            int currentPlayerIndex = 0;
             public List<Player> players = new List<Player>();
             public int Count { get { return players.Count; }}
+
+            public Player CurrentPlayer
+            {
+                get
+                {
+                    return players[currentPlayerIndex];
+                }
+            }
 
             public void Add(Player player)
             {
                 players.Add(player);
+            }
+
+            public void AdvancePlayer()
+            {
+                currentPlayerIndex = AdvancePlayer(currentPlayerIndex);
+            }
+
+            private int AdvancePlayer(int currentPlayerIndex)
+            {
+                currentPlayerIndex++;
+
+                if (currentPlayerIndex == players.Count)
+                {
+                    currentPlayerIndex = 0;
+                }
+
+                return currentPlayerIndex;
             }
         }
 
@@ -32,12 +58,11 @@ namespace Trivia
         LinkedList<string> sportsQuestions = new LinkedList<string>();
         LinkedList<string> rockQuestions = new LinkedList<string>();
 
-        int currentPlayerIndex = 0;
         bool isGettingOutOfPenaltyBox;
 
         private Player CurrentPlayer
         {
-            get { return players.players[currentPlayerIndex]; }
+            get { return players.CurrentPlayer; }
         }
 
         private int NumberOfPlayers
@@ -157,7 +182,7 @@ namespace Trivia
             var isStayingInPenaltyBox = CurrentPlayer.Penalty && !isGettingOutOfPenaltyBox;
             if (isStayingInPenaltyBox)
             {
-                AdvancePlayer();
+                players.AdvancePlayer();
                 return true;
             }
 
@@ -170,26 +195,9 @@ namespace Trivia
 
             bool winner = HasCurrentPlayerWon();
 
-            AdvancePlayer();
+            players.AdvancePlayer();
 
             return winner;
-        }
-
-        private void AdvancePlayer()
-        {
-            currentPlayerIndex = AdvancePlayer(currentPlayerIndex);
-        }
-
-        private int AdvancePlayer(int currentPlayerIndex)
-        {
-            currentPlayerIndex++;
-
-            if (currentPlayerIndex == NumberOfPlayers)
-            {
-                currentPlayerIndex = 0;
-            }
-
-            return currentPlayerIndex;
         }
 
 
@@ -201,7 +209,7 @@ namespace Trivia
             GameNotifications.NotifyPenaltyAdded(currentPlayerName);
             CurrentPlayer.Penalty = true;
 
-            AdvancePlayer();
+            players.AdvancePlayer();
 
             return true;
         }
