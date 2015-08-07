@@ -23,21 +23,26 @@ namespace Trivia
 
         int currentPlayerIndex = 0;
         bool isGettingOutOfPenaltyBox;
+        private Player CurrentPlayer
+        {
+            get { return players[currentPlayerIndex];  }
+        }
+
         private bool CurrentPlayerInPenaltyBox
         {
-            get { return players[currentPlayerIndex].Penalty; }
-            set { players[currentPlayerIndex].Penalty = value; }
+            get { return CurrentPlayer.Penalty; }
+            set { CurrentPlayer.Penalty = value; }
         }
 
         private int CurrentPlayerCoins
         {
-            get { return players[currentPlayerIndex].Coins; }
-            set { players[currentPlayerIndex].Coins = value; }
+            get { return CurrentPlayer.Coins; }
+            set { CurrentPlayer.Coins = value; }
         }
 
         private string CurrentPlayerName
         {
-            get { return players[currentPlayerIndex].Name; }
+            get { return CurrentPlayer.Name; }
         }
 
         private int NumberOfPlayers
@@ -47,8 +52,8 @@ namespace Trivia
 
         private int CurrentBoardPosition
         {
-            get { return players[currentPlayerIndex].Position; }
-            set { players[currentPlayerIndex].Position = value; }
+            get { return CurrentPlayer.Position; }
+            set { CurrentPlayer.Position = value; }
         }
 
         private const int TotalBoardPositions = 12;
