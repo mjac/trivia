@@ -20,6 +20,11 @@ namespace Trivia
 
         int currentPlayerIndex = 0;
         bool isGettingOutOfPenaltyBox;
+        private bool CurrentPlayerInPenaltyBox
+        {
+            get { return isInPenaltyBoxByPlayerIndex[currentPlayerIndex]; }
+            set { isInPenaltyBoxByPlayerIndex[currentPlayerIndex] = value; }
+        }
 
         private int CurrentPlayerCoins
         {
@@ -81,7 +86,7 @@ namespace Trivia
             GameNotifications.NotifyAboutCurrentPlayer(currentPlayerName);
             GameNotifications.NotifyAboutDieRoll(standardDieRoll);
 
-            var isInPenaltyBox = isInPenaltyBoxByPlayerIndex[currentPlayerIndex];
+            var isInPenaltyBox = CurrentPlayerInPenaltyBox;
             if (isInPenaltyBox)
             {
                 if (!TryGetOutOfPenaltyBox(standardDieRoll))
@@ -161,7 +166,7 @@ namespace Trivia
 
         public bool HandleCorrectAnswer()
         {
-            var isStayingInPenaltyBox = isInPenaltyBoxByPlayerIndex[currentPlayerIndex] && !isGettingOutOfPenaltyBox;
+            var isStayingInPenaltyBox = CurrentPlayerInPenaltyBox && !isGettingOutOfPenaltyBox;
             if (isStayingInPenaltyBox)
             {
                 AdvancePlayer();
@@ -206,7 +211,7 @@ namespace Trivia
             var currentPlayerName = CurrentPlayerName;
 
             GameNotifications.NotifyPenaltyAdded(currentPlayerName);
-            isInPenaltyBoxByPlayerIndex[currentPlayerIndex] = true;
+            CurrentPlayerInPenaltyBox = true;
 
             AdvancePlayer();
 
