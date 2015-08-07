@@ -6,6 +6,11 @@ namespace Trivia
 {
     public class TriviaGame
     {
+        private class Players
+        {
+            public List<Player> players = new List<Player>();
+        }
+
         class Player
         {
             public string Name { get; set; }
@@ -14,7 +19,7 @@ namespace Trivia
             public bool Penalty { get; set; }
         }
 
-        List<Player> players = new List<Player>();
+        private Players players = new Players();
 
         LinkedList<string> popQuestions = new LinkedList<string>();
         LinkedList<string> scienceQuestions = new LinkedList<string>();
@@ -25,7 +30,7 @@ namespace Trivia
         bool isGettingOutOfPenaltyBox;
         private Player CurrentPlayer
         {
-            get { return players[currentPlayerIndex];  }
+            get { return players.players[currentPlayerIndex]; }
         }
 
         private bool CurrentPlayerInPenaltyBox
@@ -47,7 +52,7 @@ namespace Trivia
 
         private int NumberOfPlayers
         {
-            get { return players.Count; }
+            get { return players.players.Count; }
         }
 
         private int CurrentBoardPosition
@@ -71,7 +76,7 @@ namespace Trivia
 
         public bool AddPlayer(String playerName)
         {
-            players.Add(new Player{Name = playerName});
+            players.players.Add(new Player{Name = playerName});
             var newPlayerIndex = NumberOfPlayers;
 
             GameNotifications.NotifyAboutNewPlayer(playerName, newPlayerIndex);
